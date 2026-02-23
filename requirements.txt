@@ -3,12 +3,3 @@ pymysql
 sqlalchemy
 cloud-sql-python-connector[pymysql]
 dotenv
-
-openai
-pandas
-aiohttp
-async_timeout
-tiktoken
-faiss-cpu
-tqdm
-numpy

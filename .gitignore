@@ -205,3 +205,9 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# temp utility file
+process_mat_types.py
+
+# testing SQLAlchemy
+sample_connectdb.py

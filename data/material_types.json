@@ -1,0 +1,158 @@
+[
+  {
+    "id": "1",
+    "label": "Book"
+  },
+  {
+    "id": "36",
+    "label": "Ebook"
+  },
+  {
+    "id": "33",
+    "label": "DVD"
+  },
+  {
+    "id": "35",
+    "label": "Music CD"
+  },
+  {
+    "id": "41",
+    "label": "Eaudiobook"
+  },
+  {
+    "id": "9",
+    "label": "Printed Music"
+  },
+  {
+    "id": "8",
+    "label": "Serial"
+  },
+  {
+    "id": "49",
+    "label": "Streaming Video"
+  },
+  {
+    "id": "52",
+    "label": "Audio Book on CD"
+  },
+  {
+    "id": "27",
+    "label": "Large Print"
+  },
+  {
+    "id": "6",
+    "label": "Electronic Resources"
+  },
+  {
+    "id": "48",
+    "label": "Streaming Music"
+  },
+  {
+    "id": "50",
+    "label": "Emagazine"
+  },
+  {
+    "id": "40",
+    "label": "Blu-ray Disc"
+  },
+  {
+    "id": "22",
+    "label": "Nonmusical Sound Recording"
+  },
+  {
+    "id": "44",
+    "label": "Video Game"
+  },
+  {
+    "id": "26",
+    "label": "Microform"
+  },
+  {
+    "id": "13",
+    "label": "Map"
+  },
+  {
+    "id": "21",
+    "label": "Musical Sound Recording"
+  },
+  {
+    "id": "47",
+    "label": "Atlas"
+  },
+  {
+    "id": "7",
+    "label": "Archival/Mixed Materials"
+  },
+  {
+    "id": "23",
+    "label": "Kit"
+  },
+  {
+    "id": "34",
+    "label": "Videotape"
+  },
+  {
+    "id": "51",
+    "label": "Vinyl"
+  },
+  {
+    "id": "5",
+    "label": "Sound Recording"
+  },
+  {
+    "id": "15",
+    "label": "Manuscript Material"
+  },
+  {
+    "id": "42",
+    "label": "Book + CD"
+  },
+  {
+    "id": "18",
+    "label": "Videorecording"
+  },
+  {
+    "id": "28",
+    "label": "Braille"
+  },
+  {
+    "id": "37",
+    "label": "Audio Books"
+  },
+  {
+    "id": "16",
+    "label": "Projected Medium"
+  },
+  {
+    "id": "46",
+    "label": "Book + DVD"
+  },
+  {
+    "id": "19",
+    "label": "Two Dimensional Nonprojected Graphic"
+  },
+  {
+    "id": "10",
+    "label": "Manuscript Music"
+  },
+  {
+    "id": "11",
+    "label": "Printed Cartographic Material"
+  },
+  {
+    "id": "20",
+    "label": "Three Dimensional Object (Artifact)"
+  },
+  {
+    "id": "53",
+    "label": "Audio Book on Cassette"
+  },
+  {
+    "id": "24",
+    "label": "Periodical"
+  },
+  {
+    "id": "43",
+    "label": "Book + Cassette"
+  }
+]

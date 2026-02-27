@@ -1,37 +1,60 @@
 import os
-from google.cloud.sql.connector import Connector
+from google.cloud.sql.connector import Connector, IPTypes
 import sqlalchemy
 from dotenv import load_dotenv
+import pymysql
+
+from sqlalchemy import text
 
 # Load .env file
 load_dotenv()
 
-print(os.getenv("INSTANCE_CONNECTION_NAME"))
 
-# initialize Connector object
-connector = Connector()
+def connect_with_connector() -> sqlalchemy.engine.base.Engine:
+    """
+    Initializes a connection pool for a Cloud SQL instance of MySQL.
 
-# initialize SQLAlchemy connection pool with Connector
-pool = sqlalchemy.create_engine(
-    "mysql+pymysql://",
-    creator=lambda: connector.connect(
-        os.getenv("INSTANCE_CONNECTION_NAME"),
-        "pymysql",
-        user=os.getenv("DB_USER"),
-        password=os.getenv("DB_PASS"),
-        db=os.getenv("DB_NAME")
-    ),
-)
+    Uses the Cloud SQL Python Connector package.
+    """
+    # Note: Saving credentials in environment variables is convenient, but not
+    # secure - consider a more secure solution such as
+    # Cloud Secret Manager (https://cloud.google.com/secret-manager) to help
+    # keep secrets safe.
 
-with pool.connect() as db_conn:
-   # query database
-    result = db_conn.execute(sqlalchemy.text("SELECT * from ratings")).fetchall()
+    instance_connection_name = os.environ[
+        "INSTANCE_CONNECTION_NAME"
+    ]  # e.g. 'project:region:instance'
+    db_user = os.environ["DB_USER"]  # e.g. 'my-db-user'
+    db_pass = os.environ["DB_PASS"]  # e.g. 'my-db-password'
+    db_name = os.environ["DB_NAME"]  # e.g. 'my-database'
 
-    # commit transaction (SQLAlchemy v2.X.X is commit as you go)
-    db_conn.commit()
+    ip_type = IPTypes.PRIVATE if os.environ.get("PRIVATE_IP") else IPTypes.PUBLIC
 
-    # Do something with the results
-    for row in result:
-        print(row)
+    # initialize Cloud SQL Python Connector object
+    connector = Connector(ip_type=ip_type, refresh_strategy="LAZY")
 
-connector.close()
+    def getconn() -> pymysql.connections.Connection:
+        conn: pymysql.connections.Connection = connector.connect(
+            instance_connection_name,
+            "pymysql",
+            user=db_user,
+            password=db_pass,
+            db=db_name,
+        )
+        return conn
+
+    engine = sqlalchemy.create_engine(
+        "mysql+pymysql://",
+        creator=getconn,
+        # ...
+    )
+    return engine
+
+engine = connect_with_connector()
+with engine.connect() as conn:
+    result = conn.execute(text("select 'hello world'"))
+    print(result.all())
+
+# next, try inserting data
+
+# then, try inserting data from fetchitems.py

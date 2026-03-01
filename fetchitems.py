@@ -26,7 +26,7 @@ def format_groups():
     "sec-fetch-site": "same-site",
     "Referer": "https://slouc.na2.iiivega.com/"
   }
-    body = {"searchText":"*","sorting":"relevance","sortOrder":"asc","searchType":"everything","universalLimiterIds":["at_library"],"materialTypeIds":["1"],"locationIds":["59"],"pageNum":0,"pageSize":1,"resourceType":"FormatGroup"}
+    body = {"searchText":"*","sorting":"relevance","sortOrder":"asc","searchType":"everything","universalLimiterIds":["at_library"],"materialTypeIds":["1"],"locationIds":["59"],"pageNum":0,"pageSize":10,"resourceType":"FormatGroup"}
 
     response = requests.post(url, headers=headers, json=body)
     records = response.json()
@@ -90,16 +90,37 @@ def get_edition(id):
 
     return {key: value for key, value in e_info.items() if value is not None}
 
-def get_full(): 
+# flatten lists to strings
+def flatten_data(data):
+    for record in data:
+        for key in record.keys():
+            if isinstance(record[key], list):
+                record[key] = ", ".join(record[key])
+
+# fetch records, get editions, and flatten lists
+def get_data(): 
     result = format_groups()
     for item in result:
         item.update(get_edition(item["editionId"]))
+    flatten_data(result)
     return result
 
 if __name__ == "__main__":
-    result = get_full()
-    print(result[0])
+    result = get_data()
+    with open("data.json", "w") as f:
+        json.dump(result, f, indent=2)
 
-    # create sql table: books with above column names
+    with open("data.json", "r") as f:
+        data = json.load(f)
+    
+    print(data)
+
+    
+    
+
+
+
+
+
 
         

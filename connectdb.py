@@ -16,7 +16,6 @@ from sqlalchemy import delete
 # Load .env file
 load_dotenv()
 
-
 def connect_with_connector() -> sqlalchemy.engine.base.Engine:
     """
     Initializes a connection pool for a Cloud SQL instance of MySQL.
@@ -57,43 +56,44 @@ def connect_with_connector() -> sqlalchemy.engine.base.Engine:
     )
     return engine
 
+def update_db():
+    # connect engine
+    engine = connect_with_connector()
 
-# connect engine
-engine = connect_with_connector()
+    # define metadata_obj
+    metadata_obj = MetaData()
 
-# define metadata_obj
-metadata_obj = MetaData()
+    # init books table
+    books = Table("books", metadata_obj, autoload_with=engine)
 
-# init books table
-books = Table("books", metadata_obj, autoload_with=engine)
+    # fetch and load records
+    records = get_data()
 
-# fetch and load records
-records = get_data()
+    # set of all fetched ids
+    ids = {item['id'] for item in records}
 
-# all fetched ids
-ids = {item['id'] for item in records}
+    # check to see if any records already exist in db
+    stmt = select(books.c.id)
 
-# check to see if any records already exist in db
-stmt = select(books.c.id)
+    with Session(engine) as session:
+        for row in session.execute(stmt):
+            # if id is already in db, we don't need to add it again
+            if row[0] in ids:
+                ids.remove(row[0])
+            else:
+                # if id is not in catalog but in db, remove from db
+                stmt = delete(books).where(books.c.id == row[0])
+                session.execute(stmt)
+        session.commit()
+        
+    filtered_records = [r for r in records if r['id'] in ids]
 
-with Session(engine) as session:
-    for row in session.execute(stmt):
-        if row[0] in ids:
-            ids.remove(row[0])
-        else:
-            # delete row in db where id = row[0]
-            stmt = delete(books).where(books.c.id == row[0])
-            session.execute(stmt)
-    session.commit()
-    
-filtered_records = [r for r in records if r['id'] in ids]
-
-# insert records not already in db
-with Session(engine) as session:
-    result = session.execute(
-        insert(books), filtered_records
-    )
-    session.commit()
+    # insert records not already in db
+    with Session(engine) as session:
+        result = session.execute(
+            insert(books), filtered_records
+        )
+        session.commit()
 
     
     

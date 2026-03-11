@@ -1,5 +1,6 @@
 import requests
-import json
+import httpx
+import asyncio
 
 # use to update 
 def format_groups():
@@ -24,7 +25,7 @@ def format_groups():
     }
 
     payload = {
-        "searchText": "*",
+        "searchText": "cars",
         "sorting": "relevance",
         "sortOrder": "asc",
         "searchType": "everything",
@@ -32,11 +33,13 @@ def format_groups():
         "materialTypeIds": ["33"],
         "locationIds": ["59"],
         "pageNum": 0,
-        "pageSize": 1,
+        "pageSize": 10,
         "resourceType": "FormatGroup"
     }
 
     response = requests.post(url, headers=headers, json=payload)
+
+    response.raise_for_status()
 
     records = response.json()
 
@@ -54,8 +57,8 @@ def format_groups():
 
     return parsed
 
-
 def get_edition(id):
+       
     url = f"https://na2.iiivega.com/api/search-result/editions/{id}"
 
     headers = {
@@ -75,19 +78,21 @@ def get_edition(id):
         "Referer": "https://slouc.na2.iiivega.com/"
     }
 
-    response = requests.get(url, headers=headers)
-    e = response.json().get('edition')
+    response = requests.get(url=url, headers=headers)
+    response.raise_for_status()
+    data = response.json()
+
+    e = data.get("edition", {})
 
     null_genres = {'Feature films', 'Video recordings for the hearing impaired'}
-    return {
-        'id': id,
-        'genre': ", ".join([g for g in e.get('subjGenre') if g not in null_genres]),
-        'actors': ", ".join(e.get('noteParticipant'))
-    }    
 
+    return {
+        "id": id,
+        "genre": ", ".join([g for g in e.get("subjGenre", []) if g not in null_genres]),
+        "actors": ", ".join(e.get("noteParticipant", []))
+    } 
 
 if __name__ == "__main__":
-    print(format_groups())
-    # print(get_edition('83fa7012-82c5-11ee-a04e-fd82fa1fe033'))
-
+    print(get_edition("fc300e8a-ed1a-5a72-9e68-4cdd2e3994cb"))
+    
 

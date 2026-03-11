@@ -1,63 +1,12 @@
-from sqlalchemy import MetaData
-from sqlalchemy import Table, Column, Integer, String
-from sqlalchemy import ForeignKey
-import os
-from google.cloud.sql.connector import Connector, IPTypes
-import sqlalchemy
-from dotenv import load_dotenv
-import pymysql
-from fetchitems import get_full
-from sqlalchemy import text
+# Source - https://stackoverflow.com/a/46120751
+# Posted by Yuval Pruss, modified by community. See post 'Timeline' for change history
+# Retrieved 2026-03-11, License - CC BY-SA 4.0
 
+import aiohttp
+import asyncio
+async def close_session():
+    session = aiohttp.ClientSession()
+    # use the session here
+    await session.close()
 
-# Load .env file
-load_dotenv()
-
-
-def connect_with_connector() -> sqlalchemy.engine.base.Engine:
-    """
-    Initializes a connection pool for a Cloud SQL instance of MySQL.
-
-    Uses the Cloud SQL Python Connector package.
-    """
-    # Note: Saving credentials in environment variables is convenient, but not
-    # secure - consider a more secure solution such as
-    # Cloud Secret Manager (https://cloud.google.com/secret-manager) to help
-    # keep secrets safe.
-
-    instance_connection_name = os.environ[
-        "INSTANCE_CONNECTION_NAME"
-    ]  # e.g. 'project:region:instance'
-    db_user = os.environ["DB_USER"]  # e.g. 'my-db-user'
-    db_pass = os.environ["DB_PASS"]  # e.g. 'my-db-password'
-    db_name = "items"
-
-    ip_type = IPTypes.PRIVATE if os.environ.get("PRIVATE_IP") else IPTypes.PUBLIC
-
-    # initialize Cloud SQL Python Connector object
-    connector = Connector(ip_type=ip_type, refresh_strategy="LAZY")
-
-    def getconn() -> pymysql.connections.Connection:
-        conn: pymysql.connections.Connection = connector.connect(
-            instance_connection_name,
-            "pymysql",
-            user=db_user,
-            password=db_pass,
-            db=db_name,
-        )
-        return conn
-
-    engine = sqlalchemy.create_engine(
-        "mysql+pymysql://",
-        creator=getconn,
-        # ...
-    )
-    return engine
-
-engine = connect_with_connector()
-
-metadata_obj = MetaData()
-
-items = Table("books", metadata_obj, autoload_with=engine)
-
-print(type(items))
+asyncio.run(close_session())

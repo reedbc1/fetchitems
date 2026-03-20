@@ -14,6 +14,7 @@ from sqlalchemy import ForeignKey
 import logging
 from fetchdvds import format_groups, get_edition
 import asyncio
+from asynciolimiter import Limiter
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -244,18 +245,22 @@ def generate_dif_e(engine):
             )
         return to_insert, to_delete
 
-def insert_dvd_editions(engine, to_insert):
-    # 2. insert
+async def gather_dvd_editions(to_insert):
+    # 2. gather dvd editions
     logger.info("Inserting editions...")
 
     if not to_insert:
         logger.info("Aborting: nothing to insert")
         return
     
-    editions = []
-    for id in to_insert:
-        editions.append(get_edition(id))
+    rate_limiter = Limiter(5/1)
+    coroutines = [get_edition(rate_limiter, id) for id in to_insert]
 
+    editions = await asyncio.gather(*coroutines)
+    return editions
+
+def insert_dvd_editions(engine, editions):
+    # 3. insert dvd editions into db
     with engine.connect() as conn:
         conn.execute(
             insert(dvd_editions),
@@ -265,7 +270,7 @@ def insert_dvd_editions(engine, to_insert):
         conn.commit()
 
 def delete_dvd_editions(engine, to_delete):
-    # 3. delete
+    # 4. delete dvd editions
     logger.info("Deleting editions...")
 
     with engine.connect() as conn:
@@ -280,7 +285,8 @@ def update_dvd_editions():
     logger.info("Updating dvd_editions...")
     engine = connect_with_connector()
     to_insert, to_delete = generate_dif_e(engine)
-    insert_dvd_editions(engine, to_insert)
+    editions = asyncio.run(gather_dvd_editions(to_insert))
+    insert_dvd_editions(engine, editions)
     delete_dvd_editions(engine, to_delete)
 
 ### End section ###
@@ -288,5 +294,3 @@ def update_dvd_editions():
 if __name__ == "__main__":
     update_dvd_format()
     update_dvd_editions()
-    # next task: make editions async
-    # optionally: make format async

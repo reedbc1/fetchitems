@@ -1,6 +1,9 @@
-import requests
 import httpx
 import asyncio
+
+CONFIG = {
+    "searchText": "Trucks",
+}
 
 # use to update 
 def format_groups():
@@ -25,7 +28,7 @@ def format_groups():
     }
 
     payload = {
-        "searchText": "cars",
+        "searchText": CONFIG["searchText"],
         "sorting": "relevance",
         "sortOrder": "asc",
         "searchType": "everything",
@@ -37,7 +40,7 @@ def format_groups():
         "resourceType": "FormatGroup"
     }
 
-    response = requests.post(url, headers=headers, json=payload)
+    response = httpx.request(method="POST", url=url, headers=headers, json=payload)
 
     response.raise_for_status()
 
@@ -57,8 +60,10 @@ def format_groups():
 
     return parsed
 
-def get_edition(id):
+async def get_edition(rate_limiter, id):
        
+    await rate_limiter.wait()
+
     url = f"https://na2.iiivega.com/api/search-result/editions/{id}"
 
     headers = {
@@ -78,7 +83,10 @@ def get_edition(id):
         "Referer": "https://slouc.na2.iiivega.com/"
     }
 
-    response = requests.get(url=url, headers=headers)
+    
+    async with httpx.AsyncClient() as client:
+        response = await client.request(method="GET", url=url, headers=headers)
+
     response.raise_for_status()
     data = response.json()
 
@@ -93,6 +101,7 @@ def get_edition(id):
     } 
 
 if __name__ == "__main__":
-    print(get_edition("fc300e8a-ed1a-5a72-9e68-4cdd2e3994cb"))
+    # print(format_groups())
+    print(asyncio.run(get_edition("fbf6ad7b-a510-11ec-89fe-0776e4c36191")))
     
 

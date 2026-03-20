@@ -3,3 +3,5 @@ pymysql
 sqlalchemy
 cloud-sql-python-connector[pymysql]
 dotenv
+httpx
+asynciolimiter
